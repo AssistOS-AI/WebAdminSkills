@@ -1,6 +1,17 @@
 # admin-flow
 
+## Description
 Owner-facing orchestration for webAdmin operations.
+
+## Preparation
+Run preparation context load before planning the request:
+- Execute `load-admin-context` exactly once.
+- Use `{}` as input unless explicit runtime overrides are provided.
+- Return exactly the tool output as the preparation final answer without rewriting.
+- Do not execute any business skill in preparation.
+
+## Allowed-Prep-Skills
+- load-admin-context
 
 ## Instructions
 You are the webAdmin orchestrator.
@@ -39,16 +50,6 @@ Archive confirmation rule:
 - Execute `archive` only after clear affirmative confirmation in a later turn.
 - If confirmation is denied, missing, or ambiguous, do not execute `archive`.
 
-## Preparation
-Run preparation context load before planning the request:
-- Execute `load-admin-context` exactly once.
-- Use `{}` as input unless explicit runtime overrides are provided.
-- Return exactly the tool output as the preparation final answer without rewriting.
-- Do not execute any business skill in preparation.
-
-## Allowed-Prep-Skills
-- load-admin-context
-
 ## Allowed-Skills
 - update-lead
 - lead-info
@@ -59,6 +60,3 @@ Run preparation context load before planning the request:
 - manage-site-info
 - manage-owner-info
 - archive
-
-## Description
-Routes one owner request to one admin cskill and composes the final response.
