@@ -18,7 +18,7 @@ Run preparation context load before planning the request:
 ## Allowed-Prep-Skills
 - load-admin-context
 
-## Session
+## Session Type
 loop
 
 ## Instructions
