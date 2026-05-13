@@ -7,8 +7,6 @@ Prepare deterministic runtime context for `admin-flow` planning.
 `promptText` is a JSON object with optional fields:
 - `message` (string)
 - `referenceDate` (string)
-- `dataDir` (string)
-- `agentRoot` (string)
 
 ## Output Contract
 Returns plain text containing valid LightSOPLang assignments:

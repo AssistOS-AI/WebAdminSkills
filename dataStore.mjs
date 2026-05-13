@@ -1,46 +1,26 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
 import { MarkdownDataStore } from 'achillesAgentLib';
 
 let configuredDataDir = null;
 let dataStoreInstance = null;
 
-function getDefaultAgentRoot() {
-    const sharedRuntimeDir = path.dirname(fileURLToPath(import.meta.url));
-    return path.resolve(sharedRuntimeDir, '..', '..', '..');
+function getDefaultRuntimeDataDir() {
+    return path.resolve(process.cwd(), 'data');
 }
 
-function firstExistingDir(candidates) {
-    for (const candidate of candidates) {
-        if (!candidate) continue;
-        if (fs.existsSync(candidate)) {
-            return candidate;
-        }
-    }
-    return null;
-}
-
-export function resolveDataDir(agentRoot, explicitDataDir = null) {
+export function resolveDataDir(_agentRoot, explicitDataDir = null) {
     if (explicitDataDir) {
         return path.resolve(explicitDataDir);
     }
 
-    const envDataDir = process.env.WEBADMIN_DATA_DIR || process.env.PLOINKY_DATA_DIR || '';
-    if (envDataDir.trim()) {
-        return path.resolve(envDataDir.trim());
-    }
-
-    const resolvedAgentRoot = path.resolve(agentRoot || getDefaultAgentRoot());
-    const siblingDataDir = path.resolve(resolvedAgentRoot, '..', 'data');
-    const localDataDir = path.resolve(resolvedAgentRoot, 'data');
-    return firstExistingDir([siblingDataDir, localDataDir]) || siblingDataDir;
+    return getDefaultRuntimeDataDir();
 }
 
-export function configureDataStore({ agentRoot, dataDir = null } = {}) {
-    const resolvedAgentRoot = path.resolve(agentRoot || getDefaultAgentRoot());
-    const resolvedDataDir = resolveDataDir(resolvedAgentRoot, dataDir);
+export function configureDataStore({ agentRoot = null, dataDir = null } = {}) {
+    const resolvedDataDir = resolveDataDir(agentRoot, dataDir);
+    fs.mkdirSync(resolvedDataDir, { recursive: true });
     configuredDataDir = resolvedDataDir;
     dataStoreInstance = new MarkdownDataStore({ dataDir: resolvedDataDir });
     return dataStoreInstance;

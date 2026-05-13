@@ -17,11 +17,9 @@ The **webAdmin** package is a skills-only bundle consumed by host runtimes throu
 - Shared datastore helpers are located at `dataStore.mjs`.
 - Shared constants are located at `datastore.mjs`.
 - Skills must consume shared helpers/constants; direct runtime wrappers are not used.
-- Data directory resolution order:
-  1. explicit `dataDir` override,
-  2. `WEBADMIN_DATA_DIR` / `PLOINKY_DATA_DIR` env,
-  3. `<agentRoot>/../data`,
-  4. `<agentRoot>/data`.
+- Data directory resolution is `<process.cwd()>/data` by default, with no env or agent-root fallback.
+- `configureDataStore` creates the resolved data directory before constructing `MarkdownDataStore`.
+- Tests and controlled hosts may pass an explicit `dataDir` override; runtime skill loading must otherwise use `<process.cwd()>/data`.
 
 ## Orchestration Flow
 1. Host executes `admin-flow` for owner requests.

@@ -125,7 +125,7 @@
             <p>webAdmin is also accessible through <code>/webchat?agent=webAdmin</code>.</p>
 
             <h2 id="data-structure">Data Structure</h2>
-            <p>webAdmin reads data from the shared <code>data/</code> directory:</p>
+            <p>webAdmin reads data from <code>process.cwd()/data</code>. The directory is created when the datastore is configured if it does not already exist.</p>
             <table>
                 <tr><th>Folder</th><th>Purpose</th></tr>
                 <tr><td><code>leads/</code></td><td>Lead files created by webAssist ({sessionId}-lead.md)</td></tr>
@@ -177,8 +177,6 @@
                 <tr><th>Parameter</th><th>Description</th></tr>
                 <tr><td><code>&lt;message&gt;</code></td><td>Owner message text (positional)</td></tr>
                 <tr><td><code>--session-id &lt;id&gt;</code></td><td>Reuse a specific session id</td></tr>
-                <tr><td><code>--data-dir &lt;dir&gt;</code></td><td>Override the runtime data directory</td></tr>
-                <tr><td><code>--agent-root &lt;dir&gt;</code></td><td>Override the agent root for runtime initialization</td></tr>
                 <tr><td><code>-h</code> / <code>--help</code></td><td>Print CLI usage</td></tr>
             </table>
 

@@ -7,8 +7,6 @@ Loads and normalizes the admin runtime context from datastore files, then return
 - `promptText` contains a JSON object with optional fields:
   - `message` (string) - user message to preserve as context
   - `referenceDate` (string) - ISO date used as reference in context
-  - `dataDir` (string) - explicit datastore root override
-  - `agentRoot` (string) - explicit agent root for datastore resolution
 
 ## Output Format
 - Plain-text string only.

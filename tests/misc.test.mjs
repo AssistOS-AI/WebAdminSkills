@@ -13,7 +13,26 @@ import { action as manageProfileAction } from '../skills/manage-profile/src/inde
 import { action as manageSiteInfoAction } from '../skills/manage-site-info/src/index.mjs';
 import { action as manageOwnerInfoAction } from '../skills/manage-owner-info/src/index.mjs';
 import { action as archiveAction } from '../skills/archive/src/index.mjs';
-import { configureDataStore } from '../dataStore.mjs';
+import { configureDataStore, resolveDataDir } from '../dataStore.mjs';
+
+test('default data directory resolves from process cwd', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    const previousCwd = process.cwd();
+    t.after(() => {
+        process.chdir(previousCwd);
+    });
+
+    process.chdir(sandbox.sandboxRoot);
+
+    const expectedDataDir = path.join(sandbox.sandboxRoot, 'data');
+    assert.equal(resolveDataDir(sandbox.agentRoot), expectedDataDir);
+
+    configureDataStore({ agentRoot: sandbox.agentRoot });
+    const stats = await fs.stat(expectedDataDir);
+    assert.equal(stats.isDirectory(), true);
+});
 
 test('lead-info skill returns parsed lead data and related session history', async (t) => {
     const sandbox = await createWebAdminSandbox();

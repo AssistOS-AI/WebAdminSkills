@@ -1,5 +1,4 @@
 import {
-    configureDataStore,
     ensureDataStoreConfigured,
     getDataStore,
 } from '../../../dataStore.mjs';
@@ -139,18 +138,7 @@ export async function action({ promptText }) {
         return error?.message || 'Invalid input.';
     }
 
-    const dataDir = typeof payload.dataDir === 'string' && payload.dataDir.trim()
-        ? payload.dataDir.trim()
-        : null;
-    const agentRoot = typeof payload.agentRoot === 'string' && payload.agentRoot.trim()
-        ? payload.agentRoot.trim()
-        : null;
-
-    if (dataDir || agentRoot) {
-        configureDataStore({ dataDir, agentRoot });
-    } else {
-        ensureDataStoreConfigured();
-    }
+    ensureDataStoreConfigured();
 
     const loadedContext = await loadAdminContextData();
     const assignments = buildAdminPreparationAssignments({
