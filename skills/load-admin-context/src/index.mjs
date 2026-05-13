@@ -116,36 +116,11 @@ function buildAdminPreparationAssignments({
     return lines.join('\n');
 }
 
-function parseInput(promptText) {
-    let parsed;
-    try {
-        parsed = JSON.parse(String(promptText ?? '{}'));
-    } catch {
-        throw new Error('load-admin-context expects promptText to be a valid JSON object.');
-    }
-
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error('load-admin-context input must be an object.');
-    }
-    return parsed;
-}
-
-export async function action({ promptText }) {
-    let payload;
-    try {
-        payload = parseInput(promptText);
-    } catch (error) {
-        return error?.message || 'Invalid input.';
-    }
-
+export async function action() {
     ensureDataStoreConfigured();
 
     const loadedContext = await loadAdminContextData();
     const assignments = buildAdminPreparationAssignments({
-        userMessage: typeof payload.message === 'string' ? payload.message : '',
-        referenceDate: typeof payload.referenceDate === 'string' && payload.referenceDate.trim()
-            ? payload.referenceDate.trim()
-            : new Date(),
         loadedContext,
     });
 

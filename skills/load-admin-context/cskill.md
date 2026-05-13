@@ -4,9 +4,8 @@
 Loads and normalizes the admin runtime context from datastore files, then returns SOP assignment lines for orchestrator preparation.
 
 ## Input Format
-- `promptText` contains a JSON object with optional fields:
-  - `message` (string) - user message to preserve as context
-  - `referenceDate` (string) - ISO date used as reference in context
+- No input parameters.
+- Ignore any provided `promptText`.
 
 ## Output Format
 - Plain-text string only.

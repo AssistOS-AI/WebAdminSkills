@@ -4,9 +4,7 @@
 Prepare deterministic runtime context for `admin-flow` planning.
 
 ## Input Contract
-`promptText` is a JSON object with optional fields:
-- `message` (string)
-- `referenceDate` (string)
+No input parameters are required or consumed. Any provided `promptText` is ignored.
 
 ## Output Contract
 Returns plain text containing valid LightSOPLang assignments:
