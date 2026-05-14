@@ -47,10 +47,6 @@ async function readOwnerInfo(store) {
     }
 }
 
-function buildSopAssignment(varName, value) {
-    return `@${varName} assign ${JSON.stringify(String(value ?? ''))}`;
-}
-
 async function listLeadIds() {
     const store = getDataStore();
     const leadFiles = await store.listFiles(DATASTORE_TYPES.LEADS);
@@ -98,31 +94,33 @@ async function loadAdminContextData() {
     };
 }
 
-function buildAdminPreparationAssignments({
-    userMessage = '',
+function buildContextField(fieldName, value) {
+    return `${fieldName}:\n${String(value ?? '').trim()}`;
+}
+
+function buildAdminContextMarkdown({
     referenceDate = new Date(),
     loadedContext = {},
 } = {}) {
     const normalizedDate = referenceDate instanceof Date ? referenceDate.toISOString() : String(referenceDate || '');
     const lines = [
-        buildSopAssignment('context_user_message', userMessage),
-        buildSopAssignment('context_reference_date', normalizedDate),
-        buildSopAssignment('context_known_lead_ids', loadedContext.combinedLeadIds || 'No leads available yet.'),
-        buildSopAssignment('context_known_session_ids', loadedContext.combinedSessionIds || 'No sessions available.'),
-        buildSopAssignment('context_known_profile_templates', loadedContext.combinedProfiles || 'No profiles available.'),
-        buildSopAssignment('context_owner_info_snapshot', loadedContext.combinedOwnerInfo || 'No owner info available.'),
-        buildSopAssignment('context_website_info_snapshot', loadedContext.combinedSiteInfo || 'No site info available.'),
+        buildContextField('reference_date', normalizedDate),
+        buildContextField('known_lead_ids', loadedContext.combinedLeadIds || 'No leads available yet.'),
+        buildContextField('known_session_ids', loadedContext.combinedSessionIds || 'No sessions available.'),
+        buildContextField('known_profile_templates', loadedContext.combinedProfiles || 'No profiles available.'),
+        buildContextField('owner_info_snapshot', loadedContext.combinedOwnerInfo || 'No owner info available.'),
+        buildContextField('website_info_snapshot', loadedContext.combinedSiteInfo || 'No site info available.'),
     ];
-    return lines.join('\n');
+    return lines.join('\n\n');
 }
 
 export async function action() {
     ensureDataStoreConfigured();
 
     const loadedContext = await loadAdminContextData();
-    const assignments = buildAdminPreparationAssignments({
+    const adminContext = buildAdminContextMarkdown({
         loadedContext,
     });
 
-    return assignments;
+    return `context loaded:\n${adminContext}`;
 }

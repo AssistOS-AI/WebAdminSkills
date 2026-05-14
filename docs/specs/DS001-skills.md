@@ -48,7 +48,7 @@ Skill runtime note:
 - **Function**: Moves session (`*-profile.md`, `*-history.md`) and/or lead (`*-lead.md`) files into `data/archive/` so they no longer appear in active reports.
 
 ## Skill: load-admin-context
-- **Function**: Loads and normalizes context snapshots (lead IDs, session IDs, profiles, owner info, site info) and returns SOP assignment lines for preparation.
+- **Function**: Loads and normalizes context snapshots (lead IDs, session IDs, profiles, owner info, site info) and returns plain key-value markdown text for preparation.
 
 ## Skill: admin-flow (oskill)
 - **Function**: Orchestrates owner requests by selecting and executing exactly one admin cskill per turn.

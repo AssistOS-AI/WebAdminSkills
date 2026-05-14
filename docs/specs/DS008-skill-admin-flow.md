@@ -12,7 +12,7 @@ Executes one best-fit admin skill (`news`, `statistics`, `lead-info`, `session-i
 Preparation phase:
 - Runs before planning using `Allowed-Prep-Skills`.
 - Calls only `load-admin-context`.
-- Uses preparation output as context assignments for orchestration.
+- Uses preparation output as plain text context for orchestration.
 
 ## Security Boundary (non-overridable)
 - The orchestrator instructions enforce a strict admin-only scope.
@@ -23,7 +23,7 @@ Preparation phase:
 
 ## Inputs
 - Owner message prompt text.
-- Preparation context produced by `load-admin-context` (lead IDs, session IDs, profiles, owner info, site info, reference metadata).
+- Preparation context produced by `load-admin-context` as key-value markdown text (lead IDs, session IDs, profiles, owner info, site info, reference metadata).
 
 ## Output
 - **Plain text** response string (no JSON). The response must be in the same language as the owner’s message.

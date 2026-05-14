@@ -23,7 +23,7 @@ The **webAdmin** package is a skills-only bundle consumed by host runtimes throu
 
 ## Orchestration Flow
 1. Host executes `admin-flow` for owner requests.
-2. `admin-flow` preparation executes `load-admin-context` and injects context assignments.
+2. `admin-flow` preparation executes `load-admin-context` and receives plain text context.
 3. `admin-flow` picks exactly one business cskill for each owner request.
 4. Final owner response is plain text with preserved factual values.
 

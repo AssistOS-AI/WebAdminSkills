@@ -39,6 +39,8 @@ function createFakeWebAdminLLM(LLMAgent) {
 
             if (availableCommands.length === 1 && availableCommands[0] === 'load-admin-context') {
                 lastResult = await runCommand('load-admin-context', [JSON.stringify({})]);
+                assert.match(String(lastResult), /^context loaded:\n/);
+                assert.doesNotMatch(String(lastResult), /@context_/);
             } else if (String(initialPrompt || '').includes('converted')) {
                 const args = {
                     leadId: 'dev-session-lead.md',
