@@ -3,6 +3,9 @@
 ## Description
 Lists, displays, creates, or updates visitor profiling templates in `data/profilesInfo/`. It is useful for maintaining the profile catalog used by webAssist during visitor matching and qualification.
 
+## Help
+Input: JSON { profileName?, sections?, characteristics?, interests?, qualifyingCriteria? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `profileName` (string, optional for list-all, required for display/create/update one profile)

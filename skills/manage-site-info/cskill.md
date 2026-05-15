@@ -3,6 +3,9 @@
 ## Description
 Creates, updates, or reads site information markdown files under `data/info/`. It is useful for maintaining the website knowledge base that webAssist uses when answering visitors.
 
+## Help
+Input: JSON { files? } or { fileName, content? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `files` (array of objects, optional):

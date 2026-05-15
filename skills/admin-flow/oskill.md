@@ -9,6 +9,9 @@ A lead is a potentially interesting person or opportunity. Through webAdmin, the
 
 Invoke this skill whenever the user wants to manage any of the information above, mentions webAssist or webAdmin, asks about website information, visitor information, predefined profiles, visitor sessions, visitor conversations, leads, visitor statistics, owner/contact information, or anything related to the described webAdmin/webAssist system.
 
+## Help
+Input: natural admin request about webAdmin/webAssist.
+
 ## Preparation
 Run preparation context load before planning the request:
 - Execute `load-admin-context` exactly once.

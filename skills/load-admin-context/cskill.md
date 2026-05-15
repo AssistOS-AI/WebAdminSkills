@@ -3,6 +3,9 @@
 ## Description
 Loads and normalizes the admin runtime context from datastore files, then returns it as plain key-value markdown text for orchestrator preparation.
 
+## Help
+Input: none.
+
 ## Input Format
 - No input parameters.
 

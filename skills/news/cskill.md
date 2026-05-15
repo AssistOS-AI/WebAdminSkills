@@ -3,6 +3,9 @@
 ## Description
 Provides a consolidated activity snapshot from webAssist data. It is useful when an owner wants a quick overview of what changed recently across leads, profile details, and visitor conversation history, with independent limits per section.
 
+## Help
+Input: JSON { leads?, profileDetails?, sessionHistory? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `leads` (object, optional)

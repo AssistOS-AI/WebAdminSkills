@@ -3,6 +3,9 @@
 ## Description
 Archives session and lead records, and optionally the `visitors.log` file, instead of deleting them. It is useful when an owner wants to hide old or invalid interactions from active workflows while keeping recoverable files in `data/archive/`.
 
+## Help
+Input: JSON { sessionIds?, target? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `sessionIds` (array of strings, optional when target is `visitors`; supports one or more session IDs)

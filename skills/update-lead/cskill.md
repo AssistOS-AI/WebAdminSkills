@@ -3,6 +3,9 @@
 ## Description
 Updates lifecycle state for an existing lead. It is useful when an owner wants to move a lead through the pipeline (`invalid`, `contacted`, `converted`) after review or outreach.
 
+## Help
+Input: JSON { leadId, newStatus }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `leadId` (string, required)

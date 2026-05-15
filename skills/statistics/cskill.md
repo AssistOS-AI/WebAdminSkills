@@ -3,6 +3,9 @@
 ## Description
 Computes performance metrics for a requested time interval. It is useful when an owner needs quantified reporting about unique visitors, sessions, and leads over day/week/month/year windows.
 
+## Help
+Input: JSON { interval: day|week|month|year }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `interval` (string, required; `day` | `week` | `month` | `year`)

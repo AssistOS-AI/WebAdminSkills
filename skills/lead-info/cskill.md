@@ -3,6 +3,9 @@
 ## Description
 Returns full details for one lead, including related session profile and history context. It is useful when an owner wants to inspect a specific lead before deciding next actions.
 
+## Help
+Input: JSON { leadId }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `leadId` (string, required)

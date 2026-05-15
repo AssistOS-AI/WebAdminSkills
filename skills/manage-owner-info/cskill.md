@@ -3,6 +3,9 @@
 ## Description
 Creates, updates, or reads `data/config/owner.md` for owner contact and meeting configuration data. It is useful when an owner wants to maintain the contact details that support lead handoff and meeting proposals.
 
+## Help
+Input: JSON { read?, content?, email?, phone?, calendar?, meeting? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `content` (string, optional) – full replacement content

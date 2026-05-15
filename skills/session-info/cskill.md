@@ -3,6 +3,9 @@
 ## Description
 Returns profile and conversation context for a specific session ID. It is useful when an owner wants to review visitor progression at session level, with either a bounded history sample or full history.
 
+## Help
+Input: JSON { sessionId, historyLimit?, includeFullHistory? }.
+
 ## Input Format
 - `promptText` contains a JSON object with:
   - `sessionId` (string, required)
