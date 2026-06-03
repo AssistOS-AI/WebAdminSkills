@@ -1,21 +1,27 @@
-# webAdmin Spec Matrix
+# WebAdmin Specification Matrix
 
-This page indexes the local design specification set. The DS files are the source of truth for rules, contracts, and invariants.
+## Overview
 
-## Specification Set
+This matrix tracks all DS specifications for the WebAdmin skill set. Each DS file defines contracts, invariants, and behavioral expectations for a specific domain.
 
-- [DS000 - webAdmin Vision](specsLoader.html?spec=DS000-vision.md)
-- [DS001 - webAdmin Skills and Reporting Logic](specsLoader.html?spec=DS001-skills.md)
-- [DS002 - Skill: update-lead](specsLoader.html?spec=DS002-skill-update-lead.md)
-- [DS003 - webAdmin Integration and Loading](specsLoader.html?spec=DS003-integration.md)
-- [DS004 - Skill: lead-info](specsLoader.html?spec=DS004-skill-lead-info.md)
-- [DS005 - Skill: statistics](specsLoader.html?spec=DS005-skill-statistics.md)
-- [DS006 - Skill: news](specsLoader.html?spec=DS006-skill-news.md)
-- [DS007 - Skill: manage-profile](specsLoader.html?spec=DS007-skill-manage-profile.md)
-- [DS008 - Skill: admin-flow](specsLoader.html?spec=DS008-skill-admin-flow.md)
-- [DS009 - Skill: manage-site-info](specsLoader.html?spec=DS009-skill-manage-site-info.md)
-- [DS010 - Skill: manage-owner-info](specsLoader.html?spec=DS010-skill-manage-owner-info.md)
-- [DS011 - Skill: session-info](specsLoader.html?spec=DS011-skill-session-info.md)
-- [DS012 - Skill: archive](specsLoader.html?spec=DS012-skill-archive.md)
-- [DS013 - Ploinky Runtime Invariants](specsLoader.html?spec=DS013-ploinky-runtime-invariants.md)
-- [DS014 - Skill: load-admin-context](specsLoader.html?spec=DS014-skill-load-admin-context.md)
+## Specifications
+
+| DS File | Title | Status |
+|---------|-------|--------|
+| [DS001](DS001-data-structure.md) | Data Structure and Paths | Active |
+| [DS002](DS002-lead-lifecycle.md) | Lead Lifecycle and Statuses | Active |
+| [DS003](DS003-skill-catalog.md) | Skill Catalog and Responsibilities | Active |
+| [DS004](DS004-orchestration.md) | Orchestration Flow | Active |
+| [DS005](DS005-aku-integration.md) | AKU Integration | Active |
+| [DS006](DS006-archive-protocol.md) | Archive Protocol | Active |
+| [DS007](DS007-datastore-constants.md) | Datastore Constants and Sections | Active |
+
+## Relationships
+
+- DS001 defines the physical layout that all skills read from and write to.
+- DS002 governs lead state transitions used by webadmin-leads.
+- DS003 maps each skill to its domain responsibility.
+- DS004 describes how webadmin-flow delegates to individual skills.
+- DS005 covers AKU memory root, KU types, and search/ranking.
+- DS006 specifies archive confirmation, file movement, and EXDEV handling.
+- DS007 defines the constants exported by `src/constants/datastore.mjs`.

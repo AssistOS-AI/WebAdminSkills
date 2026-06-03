@@ -1,5 +1,5 @@
 {
-    "container": "node:20-bullseye",
+    "container": "docker.io/assistos/ploinky-node:24-bookworm-tools",
     "lite-sandbox": true,
     "profiles": {
         "default": {
@@ -12,8 +12,5 @@
     "cli": "node /code/skills-only.mjs",
     "webchat": {
         "auth": "static"
-    },
-    "volumes": {
-        ".ploinky/repos/AchillesIDE/data": "/data"
     }
 }

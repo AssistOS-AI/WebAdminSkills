@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>webAdmin Docs</title>
+    <title>WebAdmin Docs</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         :root {
@@ -81,110 +81,100 @@
 <body>
     <div class="layout">
         <nav class="sidebar">
-            <div class="sidebar-title">webAdmin Agent</div>
+            <div class="sidebar-title">WebAdmin Agent</div>
             <div class="sidebar-nav">
                 <label>Navigation</label>
                 <a href="#overview">Overview</a>
-                <a href="#quick-start">Quick Start</a>
-                <a href="#webchat-access">Webchat Access</a>
                 <a href="#data-structure">Data Structure</a>
-                <a href="#news">news</a>
-                <a href="#statistics">statistics</a>
-                <a href="#lead-info">lead-info</a>
-                <a href="#session-info">session-info</a>
-                <a href="#update-lead">update-lead</a>
-                <a href="#manage-profile">manage-profile</a>
-                <a href="#manage-site-info">manage-site-info</a>
-                <a href="#manage-owner-info">manage-owner-info</a>
-                <a href="#orchestration-flow">Orchestration Flow</a>
-                <a href="#cli-parameters">CLI Parameters</a>
+                <a href="#lead-lifecycle">Lead Lifecycle</a>
+                <a href="#skills">Skills</a>
+                <a href="#orchestration">Orchestration</a>
+                <a href="#aku">AKU Integration</a>
                 <a href="#testing">Testing</a>
-            </div>
-            <div class="sidebar-sep"></div>
-            <div class="sidebar-nav">
-                <label>Specifications</label>
-                <a href="specsLoader.html?spec=matrix.md">View Full Specs</a>
             </div>
         </nav>
 
         <main class="content">
-            <h1>webAdmin Agent Documentation</h1>
-            <p>The owner-facing agent for lead lifecycle management, lead inspection, and activity reporting.</p>
+            <h1>WebAdmin Agent Documentation</h1>
+            <p>WebAdmin is a set of domain skills invoked through Achilles Copilot for administrative operations on WebAssist data. Every operation is scoped to a selected site-id.</p>
 
             <h2 id="overview">Overview</h2>
-            <p>webAdmin is an owner-facing management interface for the webAssist data system. It allows site owners to analyze leads, track visitor activity, manage profiling templates, and update site and contact information.</p>
-
-            <h2 id="quick-start">Quick Start</h2>
-            <p>webAdmin is used through the CLI. Run it directly:</p>
-            <pre><code>node webAdmin/src/index.mjs</code></pre>
-            <p>You can also send an initial message as a positional argument:</p>
-            <pre><code>node webAdmin/src/index.mjs "Show me the latest leads"</code></pre>
-            <p>Exit the interactive session by typing <code>exit</code>, <code>quit</code>, <code>:q</code>, or pressing <code>Ctrl+C</code>.</p>
-
-            <h3 id="webchat-access">Webchat Access</h3>
-            <p>webAdmin is also accessible through <code>/webchat?agent=webAdmin</code>.</p>
+            <p>WebAdmin is not a separate application. It is a skill set located in the webAssist agent workspace, invoked through Achilles Copilot in WebChat. WebAdmin skills provide domain operations: configuration, review, archive, reporting, and AKU management.</p>
 
             <h2 id="data-structure">Data Structure</h2>
-            <p>webAdmin reads data from <code>process.cwd()/data</code>. The directory is created when the datastore is configured if it does not already exist.</p>
+            <p>All WebAdmin operational data is stored under <code>.ploinky/agents/webassist/data/sites/&lt;site-id&gt;/</code>:</p>
             <table>
                 <tr><th>Folder</th><th>Purpose</th></tr>
-                <tr><td><code>leads/</code></td><td>Lead files created by webAssist ({sessionId}-lead.md)</td></tr>
-                <tr><td><code>sessions/</code></td><td>Session profile and history files from webAssist</td></tr>
-                <tr><td><code>profilesInfo/</code></td><td>Visitor profiling templates</td></tr>
+                <tr><td><code>sessions/</code></td><td>Session history files ({sessionId}-history.md)</td></tr>
+                <tr><td><code>leads/</code></td><td>Lead files ({sessionId}-lead.md)</td></tr>
+                <tr><td><code>profiles/</code></td><td>Target visitor profile templates</td></tr>
                 <tr><td><code>info/</code></td><td>Website information files</td></tr>
-                <tr><td><code>config/</code></td><td>Owner contact configuration (owner.md)</td></tr>
+                <tr><td><code>config/</code></td><td>Owner contact (owner.md) and policy (policy.md)</td></tr>
+                <tr><td><code>visits/</code></td><td>Append-only events log (events.md)</td></tr>
+                <tr><td><code>archive/</code></td><td>Archived sessions and leads</td></tr>
+                <tr><td><code>.aku/</code></td><td>Agentic Knowledge Units memory</td></tr>
             </table>
 
-            <h2 id="skills-and-commands">Skills and Commands</h2>
-
-            <h3 id="news">news</h3>
-            <p>List recent activity from webAssist data: newest leads, recent profile-detail updates, and recent conversation messages. Each category accepts its own limit and is sorted by newest first.</p>
-            <p><em>Example: "Show recent leads, profile updates, and conversation news"</em></p>
-
-            <h3 id="statistics">statistics</h3>
-            <p>Generate performance metrics over time intervals: day, week, month, or year. Reports total sessions, total leads, and leads by profile.</p>
-            <p><em>Example: "Show statistics for this month"</em></p>
-
-            <h3 id="lead-info">lead-info</h3>
-            <p>Display comprehensive details for a specific lead, including profile, contact info, and full session history.</p>
-            <p><em>Example: "Show details for the Developer lead"</em></p>
-
-            <h3 id="session-info">session-info</h3>
-            <p>Display details for a specific session ID, including profiles, profile details, and conversation history. By default it returns the first 10 history messages, or full history when requested.</p>
-            <p><em>Example: "Show session info for dev-session"</em></p>
-
-            <h3 id="update-lead">update-lead</h3>
-            <p>Change a lead's status. Allowed transitions from <code>new</code>: <code>invalid</code>, <code>contacted</code>, or <code>converted</code>.</p>
-            <p><em>Example: "Mark the latest lead as contacted"</em></p>
-
-            <h3 id="manage-profile">manage-profile</h3>
-            <p>Create or update visitor profiling templates in <code>profilesInfo/</code>. Each profile defines characteristics, interests, and qualifying criteria used by webAssist to match visitors.</p>
-            <p><em>Example: "Create a profile for Enterprise Clients"</em></p>
-
-            <h3 id="manage-site-info">manage-site-info</h3>
-            <p>Create or update website information files under <code>data/info/</code>. Use this to update the knowledge base available to webAssist.</p>
-            <p><em>Example: "Update the services information file"</em></p>
-
-            <h3 id="manage-owner-info">manage-owner-info</h3>
-            <p>Update your contact information stored in <code>data/config/owner.md</code>. Supports email, phone, calendar links, and meeting details.</p>
-            <p><em>Example: "Update my phone number to +40123456789"</em></p>
-
-            <h2 id="orchestration-flow">Orchestration Flow</h2>
-            <p>webAdmin uses the <strong>admin-flow</strong> orchestrator, which processes each owner request by selecting exactly one skill, executing it, and formatting the result in the same language as the request. Runtime context includes known lead IDs, known session IDs, profiles, owner info, and website info. No manual skill selection is needed—just describe what you need in natural language.</p>
-
-            <h2 id="cli-parameters">CLI Parameters</h2>
+            <h2 id="lead-lifecycle">Lead Lifecycle</h2>
             <table>
-                <tr><th>Parameter</th><th>Description</th></tr>
-                <tr><td><code>&lt;message&gt;</code></td><td>Owner message text (positional)</td></tr>
-                <tr><td><code>--session-id &lt;id&gt;</code></td><td>Reuse a specific session id</td></tr>
-                <tr><td><code>-h</code> / <code>--help</code></td><td>Print CLI usage</td></tr>
+                <tr><th>Status</th><th>Meaning</th></tr>
+                <tr><td><code>new</code></td><td>Created by WebAssist, awaiting administrative review</td></tr>
+                <tr><td><code>approved</code></td><td>Accepted as relevant for follow-up</td></tr>
+                <tr><td><code>not-relevant</code></td><td>Rejected after administrative review</td></tr>
+                <tr><td><code>contacted</code></td><td>Contact has been initiated by an administrator</td></tr>
+                <tr><td><code>closed</code></td><td>Follow-up concluded</td></tr>
             </table>
+
+            <h2 id="skills">Skills</h2>
+
+            <h3>webadmin-flow (Orchestrator)</h3>
+            <p>Entry-point orchestrator. Interprets administrative requests, maintains the selected site-id, and delegates to authorized WebAdmin skills.</p>
+
+            <h3>webadmin-context (Code Skill)</h3>
+            <p>Loads metadata for the selected site-id: profile names, owner info, policy, lead IDs, session IDs.</p>
+
+            <h3>webadmin-archive (Code Skill)</h3>
+            <p>Archives sessions and leads by moving them to <code>archive/sessions/</code> and <code>archive/leads/</code>. Requires explicit confirmation before execution.</p>
+
+            <h3>webadmin-site-config (Code Skill)</h3>
+            <p>Creates or updates website configuration: owner contact routes, visitor notice, consent policy, and retention rules.</p>
+
+            <h3>webadmin-ownerInfo (Code Skill)</h3>
+            <p>Creates, reads, updates, removes, and lists owner contact info.</p>
+
+            <h3>webadmin-profiles (Code Skill)</h3>
+            <p>Creates, updates, lists, removes, and reviews target visitor profiles and their mandatory conditions.</p>
+
+            <h3>webadmin-sessions (Code Skill)</h3>
+            <p>Lists and reads visitor sessions, inspects conversation histories and profile summaries.</p>
+
+            <h3>webadmin-leads (Code Skill)</h3>
+            <p>Lists and reads leads, reviews matching rationales, changes lead statuses, and archives selected leads.</p>
+
+            <h3>webadmin-statistics (Code Skill)</h3>
+            <p>Produces daily, weekly, and monthly summaries of visits, chats, origin distributions, matches, leads, and administrative outcomes.</p>
+
+            <h3>webadmin-ku-design (Orchestrator)</h3>
+            <p>Proposes the initial Knowledge Unit structure for a website. Administrator may accept, modify, or extend.</p>
+
+            <h3>webadmin-ku-store (Code Skill)</h3>
+            <p>Creates, updates, forks, archives, or discards site-scoped Knowledge Units through the AKU library.</p>
+
+            <h3>webadmin-ku-consolidate (Orchestrator)</h3>
+            <p>Reviews operational records selected by the administrator and produces consolidated findings for storage as KUs.</p>
+
+            <h3>webadmin-ku-search (Code Skill)</h3>
+            <p>Executes AKU keyword search and BM25F ranking, returns a compact ContextPack.</p>
+
+            <h2 id="orchestration">Orchestration</h2>
+            <p>WebAdmin uses the <strong>webadmin-flow</strong> orchestrator, which processes each admin request by selecting exactly one skill, executing it, and formatting the result in the same language as the request. No manual skill selection is needed.</p>
+
+            <h2 id="aku">AKU Integration</h2>
+            <p>Each website has its own AKU memory root under <code>data/sites/&lt;site-id&gt;/.aku/</code>. AKU stores curated knowledge derived from administrative work. Knowledge Units include: site-positioning, target-profile-strategy, visitor-question-patterns, lead-quality-analysis, conversion-and-engagement-analysis, privacy-consent-and-retention-decisions, and website-improvement-decisions.</p>
 
             <h2 id="testing">Testing</h2>
             <p>Tests are in the <code>tests/</code> directory with dedicated fixtures. Run:</p>
             <pre><code>node tests/runAll.mjs</code></pre>
-            <p>Or run all test files directly:</p>
-            <pre><code>node --test "tests/*.test.mjs"</code></pre>
         </main>
     </div>
 </body>
