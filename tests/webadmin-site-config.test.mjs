@@ -12,15 +12,17 @@ test('webadmin-site-config reads policy config', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
-        promptText: JSON.stringify({ target: 'policy' }),
+        promptText: JSON.stringify({
+            siteId: sandbox.siteId,
+            target: 'policy',
+        }),
     });
 
     assert.match(result, /policy config/);
-    assert.match(result, /Consent Rule/);
+    assert.match(result, /Retention/);
 });
 
 test('webadmin-site-config updates policy fields', async (t) => {
@@ -30,11 +32,11 @@ test('webadmin-site-config updates policy fields', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             target: 'policy',
             fields: {
                 'Retention': 'Sessions retained 60 days.',
@@ -52,13 +54,30 @@ test('webadmin-site-config rejects invalid target', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     await assert.rejects(
         async () => action({
-            promptText: JSON.stringify({ target: 'invalid' }),
+            promptText: JSON.stringify({
+                siteId: sandbox.siteId,
+                target: 'invalid',
+            }),
         }),
         /requires a valid target/
+    );
+});
+
+test('webadmin-site-config requires siteId', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    configureDataStore({
+        agentRoot: sandbox.agentRoot,
+        dataDir: sandbox.dataDir,
+    });
+
+    await assert.rejects(
+        () => action({ promptText: JSON.stringify({ target: 'policy' }) }),
+        /requires siteId/
     );
 });

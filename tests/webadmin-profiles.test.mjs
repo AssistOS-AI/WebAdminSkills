@@ -14,10 +14,11 @@ test('webadmin-profiles lists existing profiles', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
-    const result = await action({ promptText: '{}' });
+    const result = await action({
+        promptText: JSON.stringify({ siteId: sandbox.siteId }),
+    });
     assert.match(result, /Developer/);
     assert.match(result, /EnterpriseClient/);
 });
@@ -29,11 +30,11 @@ test('webadmin-profiles creates and updates a profile with mandatory conditions'
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const createResult = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             profileName: 'Investor',
             characteristics: ['Capital allocator', 'Portfolio manager'],
             interests: ['Equity opportunities', 'Strategic partnerships'],
@@ -48,6 +49,7 @@ test('webadmin-profiles creates and updates a profile with mandatory conditions'
 
     const displayResult = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'display',
             profileName: 'Investor',
         }),
@@ -56,4 +58,19 @@ test('webadmin-profiles creates and updates a profile with mandatory conditions'
     assert.match(displayResult, /Investor/);
     assert.match(displayResult, /Capital allocator/);
     assert.match(displayResult, /Due diligence completed/);
+});
+
+test('webadmin-profiles requires siteId', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    configureDataStore({
+        agentRoot: sandbox.agentRoot,
+        dataDir: sandbox.dataDir,
+    });
+
+    await assert.rejects(
+        () => action({ promptText: '{}' }),
+        /requires siteId/
+    );
 });

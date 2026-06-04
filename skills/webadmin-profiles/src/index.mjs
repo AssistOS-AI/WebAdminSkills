@@ -1,6 +1,5 @@
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
@@ -35,7 +34,12 @@ function sanitizeProfileName(name) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
-    const store = getDataStore();
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-profiles requires siteId.');
+    }
+
+    const store = getSiteStore(siteId);
 
     const profileName = sanitizeProfileName(payload.profileName);
     const characteristics = Array.isArray(payload.characteristics) ? payload.characteristics : null;
@@ -48,9 +52,9 @@ export async function action({ promptText }) {
     if (action === 'list') {
         const listing = await store.listFiles(DATASTORE_TYPES.PROFILES);
         if (listing.files.length === 0) {
-            return 'No profiles found.';
+            return `No profiles found for site: ${siteId}.`;
         }
-        return `Profiles:\n${listing.files.map(f => `- ${f}`).join('\n')}`;
+        return `Profiles (${siteId}):\n${listing.files.map(f => `- ${f}`).join('\n')}`;
     }
 
     if (action === 'remove') {
@@ -59,7 +63,7 @@ export async function action({ promptText }) {
         }
         try {
             await store.deleteFile(DATASTORE_TYPES.PROFILES, profileName);
-            return `Removed profile: ${profileName}.`;
+            return `Removed profile: ${profileName} from site: ${siteId}.`;
         } catch (error) {
             if (error.code === 'ENOENT') {
                 return `Profile not found: ${profileName}.`;
@@ -77,7 +81,7 @@ export async function action({ promptText }) {
             : null;
         try {
             const file = await store.getFile(DATASTORE_TYPES.PROFILES, profileName, sections);
-            const lines = [`Profile: ${profileName}`];
+            const lines = [`Profile: ${profileName} (${siteId})`];
             for (const section of file.sections) {
                 lines.push(`\n${section.name}:\n${section.content}`);
             }
@@ -90,7 +94,6 @@ export async function action({ promptText }) {
         }
     }
 
-    // Create or update.
     if (!profileName) {
         throw new Error('webadmin-profiles requires profileName for create/update.');
     }
@@ -115,8 +118,7 @@ export async function action({ promptText }) {
 
     await store.replaceFile(DATASTORE_TYPES.PROFILES, profileName, sections);
 
-    const mode = 'create';
-    const lines = [`${mode === 'create' ? 'Created' : 'Updated'} profile: ${profileName}.`];
+    const lines = [`Created/updated profile: ${profileName} for site: ${siteId}.`];
     for (const [name, content] of Object.entries(sections)) {
         const items = store.parseList(content);
         lines.push(`- ${name}: ${items.length} items`);

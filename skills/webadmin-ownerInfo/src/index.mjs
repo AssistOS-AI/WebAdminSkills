@@ -1,6 +1,5 @@
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
@@ -25,8 +24,13 @@ function normalizeAction(value) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-ownerInfo requires siteId.');
+    }
+
     const action = normalizeAction(payload.action);
-    const store = getDataStore();
+    const store = getSiteStore(siteId);
     const content = typeof payload.content === 'string' ? payload.content.trim() : '';
     const fields = payload.fields && typeof payload.fields === 'object' && !Array.isArray(payload.fields)
         ? payload.fields
@@ -35,9 +39,9 @@ export async function action({ promptText }) {
     if (action === 'read' || (!action && !content && !fields)) {
         try {
             const file = await store.getSectionMap(DATASTORE_TYPES.CONFIG, CONFIG_FILES.OWNER);
-            return `Owner contact info:\n${file.rawMarkdown || '(empty)'}`;
+            return `Owner contact info (${siteId}):\n${file.rawMarkdown || '(empty)'}`;
         } catch {
-            return 'Owner contact info: (not configured)';
+            return `Owner contact info (${siteId}): (not configured)`;
         }
     }
 
@@ -45,7 +49,7 @@ export async function action({ promptText }) {
         await store.replaceFile(DATASTORE_TYPES.CONFIG, CONFIG_FILES.OWNER, {
             Content: content,
         });
-        return 'Replaced owner contact info.';
+        return `Replaced owner contact info for site: ${siteId}.`;
     }
 
     if (fields) {
@@ -53,9 +57,7 @@ export async function action({ promptText }) {
         try {
             const existing = await store.getSectionMap(DATASTORE_TYPES.CONFIG, CONFIG_FILES.OWNER);
             existingContent = existing.rawMarkdown || '';
-        } catch {
-            // File does not exist yet.
-        }
+        } catch { /* file does not exist yet */ }
 
         const existingLines = existingContent ? existingContent.split('\n') : [];
         const updatedLines = [];
@@ -88,7 +90,7 @@ export async function action({ promptText }) {
             Content: newContent,
         });
 
-        return `Updated owner contact fields: ${Object.keys(fields).join(', ')}.`;
+        return `Updated owner contact fields: ${Object.keys(fields).join(', ')} for site: ${siteId}.`;
     }
 
     throw new Error('webadmin-ownerInfo requires action, content, or fields.');

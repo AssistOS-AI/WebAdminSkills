@@ -1,6 +1,5 @@
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
@@ -25,12 +24,17 @@ function normalizeTarget(value) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-site-config requires siteId.');
+    }
+
     const target = normalizeTarget(payload.target);
     if (!target) {
         throw new Error('webadmin-site-config requires a valid target: owner or policy.');
     }
 
-    const store = getDataStore();
+    const store = getSiteStore(siteId);
     const content = typeof payload.content === 'string' ? payload.content.trim() : '';
     const fields = payload.fields && typeof payload.fields === 'object' && !Array.isArray(payload.fields)
         ? payload.fields
@@ -41,9 +45,7 @@ export async function action({ promptText }) {
         try {
             const existing = await store.getSectionMap(DATASTORE_TYPES.CONFIG, target);
             existingContent = existing.rawMarkdown || '';
-        } catch {
-            // File does not exist yet.
-        }
+        } catch { /* file does not exist yet */ }
 
         const existingLines = existingContent ? existingContent.split('\n') : [];
         const updatedLines = [];
@@ -76,21 +78,20 @@ export async function action({ promptText }) {
             Content: newContent,
         });
 
-        return `Updated ${target} config fields: ${Object.keys(fields).join(', ')}.`;
+        return `Updated ${target} config fields: ${Object.keys(fields).join(', ')} for site: ${siteId}.`;
     }
 
     if (content) {
         await store.replaceFile(DATASTORE_TYPES.CONFIG, target, {
             Content: content,
         });
-        return `Replaced ${target} config.`;
+        return `Replaced ${target} config for site: ${siteId}.`;
     }
 
-    // Read mode.
     try {
         const file = await store.getSectionMap(DATASTORE_TYPES.CONFIG, target);
-        return `${target} config:\n${file.rawMarkdown || '(empty)'}`;
+        return `${target} config (${siteId}):\n${file.rawMarkdown || '(empty)'}`;
     } catch {
-        return `${target} config: (not configured)`;
+        return `${target} config (${siteId}): (not configured)`;
     }
 }

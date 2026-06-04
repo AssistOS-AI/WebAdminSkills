@@ -12,10 +12,11 @@ test('webadmin-sessions lists existing sessions', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
-    const result = await action({ promptText: '{}' });
+    const result = await action({
+        promptText: JSON.stringify({ siteId: sandbox.siteId }),
+    });
     assert.match(result, /visitor-42-history/);
 });
 
@@ -26,11 +27,11 @@ test('webadmin-sessions reads a session with profile and history', async (t) => 
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'read',
             sessionId: 'visitor-42',
         }),
@@ -50,15 +51,30 @@ test('webadmin-sessions returns not found for missing session', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'read',
             sessionId: 'nonexistent-session',
         }),
     });
 
     assert.match(result, /Session not found/);
+});
+
+test('webadmin-sessions requires siteId', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    configureDataStore({
+        agentRoot: sandbox.agentRoot,
+        dataDir: sandbox.dataDir,
+    });
+
+    await assert.rejects(
+        () => action({ promptText: '{}' }),
+        /requires siteId/
+    );
 });

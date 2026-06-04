@@ -14,10 +14,11 @@ test('webadmin-leads lists existing leads', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
-    const result = await action({ promptText: '{}' });
+    const result = await action({
+        promptText: JSON.stringify({ siteId: sandbox.siteId }),
+    });
     assert.match(result, /visitor-42-lead/);
     assert.match(result, /status=new/);
     assert.match(result, /profile=Developer/);
@@ -30,11 +31,11 @@ test('webadmin-leads reads a lead with full details', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'read',
             leadId: 'visitor-42-lead',
         }),
@@ -53,11 +54,11 @@ test('webadmin-leads updates lead status', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'updateStatus',
             leadId: 'visitor-42-lead',
             newStatus: 'approved',
@@ -68,6 +69,7 @@ test('webadmin-leads updates lead status', async (t) => {
 
     const readResult = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             action: 'read',
             leadId: 'visitor-42-lead',
         }),
@@ -83,17 +85,32 @@ test('webadmin-leads rejects invalid status', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     await assert.rejects(
         async () => action({
             promptText: JSON.stringify({
+                siteId: sandbox.siteId,
                 action: 'updateStatus',
                 leadId: 'visitor-42-lead',
                 newStatus: 'invalid-status',
             }),
         }),
         /requires valid newStatus/
+    );
+});
+
+test('webadmin-leads requires siteId', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    configureDataStore({
+        agentRoot: sandbox.agentRoot,
+        dataDir: sandbox.dataDir,
+    });
+
+    await assert.rejects(
+        () => action({ promptText: '{}' }),
+        /requires siteId/
     );
 });

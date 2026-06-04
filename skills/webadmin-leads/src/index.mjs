@@ -1,13 +1,11 @@
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
     LEAD_SECTIONS,
     LEAD_FIELDS,
     LEAD_STATUSES,
-    SESSION_SECTIONS,
     getSessionHistoryFileName,
 } from '../../../src/constants/datastore.mjs';
 
@@ -41,7 +39,12 @@ function normalizeLeadId(value) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
-    const store = getDataStore();
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-leads requires siteId.');
+    }
+
+    const store = getSiteStore(siteId);
 
     const action = normalizeAction(payload.action);
     const leadId = normalizeLeadId(payload.leadId);
@@ -51,10 +54,10 @@ export async function action({ promptText }) {
     if (action === 'list' || (!action && !leadId)) {
         const listing = await store.listFiles(DATASTORE_TYPES.LEADS);
         if (listing.files.length === 0) {
-            return 'No leads found.';
+            return `No leads found for site: ${siteId}.`;
         }
 
-        const lines = ['Leads:'];
+        const lines = [`Leads (${siteId}):`];
         for (const fileName of listing.files) {
             try {
                 const file = await store.getSectionMap(DATASTORE_TYPES.LEADS, fileName);
@@ -96,12 +99,6 @@ export async function action({ promptText }) {
             if (existing.sections?.[LEAD_SECTIONS.CONTACT_INFO]) {
                 sections[LEAD_SECTIONS.CONTACT_INFO] = existing.sections[LEAD_SECTIONS.CONTACT_INFO];
             }
-            if (existing.sections?.[LEAD_SECTIONS.CONSENT]) {
-                sections[LEAD_SECTIONS.CONSENT] = existing.sections[LEAD_SECTIONS.CONSENT];
-            }
-            if (existing.sections?.[LEAD_SECTIONS.CONTACT_ROUTE]) {
-                sections[LEAD_SECTIONS.CONTACT_ROUTE] = existing.sections[LEAD_SECTIONS.CONTACT_ROUTE];
-            }
             if (existing.sections?.[LEAD_SECTIONS.SUMMARY]) {
                 sections[LEAD_SECTIONS.SUMMARY] = existing.sections[LEAD_SECTIONS.SUMMARY];
             }
@@ -116,7 +113,6 @@ export async function action({ promptText }) {
         }
     }
 
-    // Read action.
     try {
         const file = await store.getSectionMap(DATASTORE_TYPES.LEADS, leadId);
         const lines = [`Lead: ${leadId}`];
@@ -136,17 +132,11 @@ export async function action({ promptText }) {
             lines.push(`\nContact Info:\n${contactInfo}`);
         }
 
-        const consent = file.sections?.[LEAD_SECTIONS.CONSENT];
-        if (consent && consent !== '*None*') {
-            lines.push(`\nConsent:\n${consent}`);
-        }
-
         const summary = file.sections?.[LEAD_SECTIONS.SUMMARY];
         if (summary && summary !== '*None*') {
             lines.push(`\nSummary:\n${summary}`);
         }
 
-        // Try to load related session.
         const parsedLeadInfo = store.parseKeyValue(leadInfo);
         const relatedSessionId = parsedLeadInfo?.[LEAD_FIELDS.SESSION_ID];
         if (relatedSessionId) {
@@ -159,9 +149,7 @@ export async function action({ promptText }) {
                 if (sessionProfile && sessionProfile !== '*None*') {
                     lines.push(`\nRelated Session Profile (${relatedSessionId}):\n${sessionProfile}`);
                 }
-            } catch {
-                // Session not found, skip.
-            }
+            } catch { /* session not found */ }
         }
 
         return lines.join('\n');

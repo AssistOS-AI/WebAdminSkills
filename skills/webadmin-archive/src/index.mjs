@@ -2,8 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
     getConfiguredDataDir,
 } from '../../../src/runtime/dataStore.mjs';
 import {
@@ -30,14 +29,21 @@ function normalizeTarget(value) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-archive requires siteId.');
+    }
+
     const target = normalizeTarget(payload.target);
     const sessionIds = Array.isArray(payload.sessionIds) ? payload.sessionIds : [];
     const leadIds = Array.isArray(payload.leadIds) ? payload.leadIds : [];
-    const dataDir = getConfiguredDataDir();
-    const store = getDataStore();
 
-    const archiveSessionsDir = path.join(dataDir, DATASTORE_TYPES.ARCHIVE, ARCHIVE_FOLDERS.SESSIONS);
-    const archiveLeadsDir = path.join(dataDir, DATASTORE_TYPES.ARCHIVE, ARCHIVE_FOLDERS.LEADS);
+    const store = getSiteStore(siteId);
+    const dataDir = getConfiguredDataDir();
+    const siteDataDir = path.join(dataDir, 'sites', siteId);
+
+    const archiveSessionsDir = path.join(siteDataDir, DATASTORE_TYPES.ARCHIVE, ARCHIVE_FOLDERS.SESSIONS);
+    const archiveLeadsDir = path.join(siteDataDir, DATASTORE_TYPES.ARCHIVE, ARCHIVE_FOLDERS.LEADS);
 
     const archived = [];
     const alreadyArchived = [];
@@ -48,9 +54,7 @@ export async function action({ promptText }) {
             await fs.access(destPath);
             alreadyArchived.push(label);
             return;
-        } catch {
-            // File not in archive yet, check source.
-        }
+        } catch { /* not in archive yet */ }
 
         try {
             await fs.access(sourcePath);
@@ -83,7 +87,7 @@ export async function action({ promptText }) {
 
         for (const sessionId of idsToArchive) {
             const historyFile = `${getSessionHistoryFileName(sessionId)}.md`;
-            const sourcePath = path.join(dataDir, DATASTORE_TYPES.SESSIONS, historyFile);
+            const sourcePath = path.join(siteDataDir, DATASTORE_TYPES.SESSIONS, historyFile);
             const destPath = path.join(archiveSessionsDir, historyFile);
             await doArchive(sourcePath, destPath, `session:${sessionId}`);
         }
@@ -98,7 +102,7 @@ export async function action({ promptText }) {
 
         for (const leadId of idsToArchive) {
             const leadFile = `${leadId}.md`;
-            const sourcePath = path.join(dataDir, DATASTORE_TYPES.LEADS, leadFile);
+            const sourcePath = path.join(siteDataDir, DATASTORE_TYPES.LEADS, leadFile);
             const destPath = path.join(archiveLeadsDir, leadFile);
             await doArchive(sourcePath, destPath, `lead:${leadId}`);
         }
@@ -111,7 +115,7 @@ export async function action({ promptText }) {
         await archiveLeads(leadIds);
     }
 
-    const lines = ['Archive report:'];
+    const lines = [`Archive report (${siteId}):`];
     if (archived.length > 0) {
         lines.push(`Archived: ${archived.join(', ')}`);
     }

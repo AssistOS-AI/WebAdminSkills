@@ -1,6 +1,5 @@
 import {
-    configureDataStore,
-    getDataStore,
+    getSiteStore,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
@@ -26,7 +25,12 @@ function normalizeAction(value) {
 
 export async function action({ promptText }) {
     const payload = parsePayload(promptText);
-    const store = getDataStore();
+    const siteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
+    if (!siteId) {
+        throw new Error('webadmin-sessions requires siteId.');
+    }
+
+    const store = getSiteStore(siteId);
 
     const action = normalizeAction(payload.action);
     const sessionId = typeof payload.sessionId === 'string' ? payload.sessionId.trim() : '';
@@ -36,9 +40,9 @@ export async function action({ promptText }) {
     if (action === 'list' || (!action && !sessionId)) {
         const listing = await store.listFiles(DATASTORE_TYPES.SESSIONS);
         if (listing.files.length === 0) {
-            return 'No sessions found.';
+            return `No sessions found for site: ${siteId}.`;
         }
-        return `Sessions:\n${listing.files.map(f => `- ${f}`).join('\n')}`;
+        return `Sessions (${siteId}):\n${listing.files.map(f => `- ${f}`).join('\n')}`;
     }
 
     if (!sessionId) {
@@ -50,11 +54,6 @@ export async function action({ promptText }) {
         const file = await store.getSectionMap(DATASTORE_TYPES.SESSIONS, fileName);
         const lines = [`Session: ${sessionId}`];
 
-        const profiles = file.sections?.[SESSION_SECTIONS.TARGET_PROFILES];
-        if (profiles && profiles !== '*None*') {
-            lines.push(`\nTarget Profiles:\n${profiles}`);
-        }
-
         const profileDetails = file.sections?.[SESSION_SECTIONS.PROFILE_DETAILS];
         if (profileDetails && profileDetails !== '*None*') {
             lines.push(`\nProfile Details:\n${profileDetails}`);
@@ -63,11 +62,6 @@ export async function action({ promptText }) {
         const contactInfo = file.sections?.[SESSION_SECTIONS.CONTACT_INFORMATION];
         if (contactInfo && contactInfo !== '*None*') {
             lines.push(`\nContact Information:\n${contactInfo}`);
-        }
-
-        const consent = file.sections?.[SESSION_SECTIONS.CONSENT];
-        if (consent && consent !== '*None*') {
-            lines.push(`\nConsent:\n${consent}`);
         }
 
         const history = file.sections?.[SESSION_SECTIONS.HISTORY];

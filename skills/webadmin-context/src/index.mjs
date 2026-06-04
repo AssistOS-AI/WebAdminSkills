@@ -1,7 +1,7 @@
 import {
-    configureDataStore,
     getDataStore,
-    getConfiguredSiteId,
+    getSiteStore,
+    listSites,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
@@ -11,77 +11,77 @@ import {
     CONFIG_FILES,
 } from '../../../src/constants/datastore.mjs';
 
-function formatSnapshot(label, rawMarkdown) {
-    if (!rawMarkdown || rawMarkdown.trim() === '' || rawMarkdown === '*None*') {
-        return `${label}: (empty)`;
+function parsePayload(promptText) {
+    try {
+        const parsed = JSON.parse(String(promptText ?? '{}'));
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch {
+        throw new Error('webadmin-context expects promptText to be valid JSON.');
     }
-    return `${label}:\n${rawMarkdown.trim()}`;
+}
+
+async function getSiteSummary(siteId) {
+    const store = getSiteStore(siteId);
+    let sessionCount = 0;
+    let leadCount = 0;
+    let profileCount = 0;
+    let ownerSnippet = '(not configured)';
+
+    try {
+        const sessions = await store.listFiles(DATASTORE_TYPES.SESSIONS);
+        sessionCount = sessions.files.length;
+    } catch { /* no sessions folder */ }
+
+    try {
+        const leads = await store.listFiles(DATASTORE_TYPES.LEADS);
+        leadCount = leads.files.length;
+    } catch { /* no leads folder */ }
+
+    try {
+        const profiles = await store.listFiles(DATASTORE_TYPES.PROFILES);
+        profileCount = profiles.files.length;
+    } catch { /* no profiles folder */ }
+
+    try {
+        const ownerFile = await store.getSectionMap(DATASTORE_TYPES.CONFIG, CONFIG_FILES.OWNER);
+        const firstLine = (ownerFile.rawMarkdown || '').split('\n').find((l) => l.trim());
+        ownerSnippet = firstLine ? firstLine.trim() : '(empty)';
+    } catch { /* no owner config */ }
+
+    return {
+        siteId,
+        sessions: sessionCount,
+        leads: leadCount,
+        profiles: profileCount,
+        ownerSnippet,
+    };
 }
 
 export async function action({ promptText }) {
-    const store = getDataStore();
-    const siteId = getConfiguredSiteId();
+    const payload = parsePayload(promptText);
+    const detailSiteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
 
-    const referenceDate = new Date().toISOString().slice(0, 10);
-
-    let knownLeadIds = [];
-    try {
-        const leads = await store.listFiles(DATASTORE_TYPES.LEADS);
-        knownLeadIds = leads.files;
-    } catch {
-        // No leads folder yet.
+    if (detailSiteId) {
+        const summary = await getSiteSummary(detailSiteId);
+        const lines = [
+            `Site: ${summary.siteId}`,
+            `Sessions: ${summary.sessions}`,
+            `Leads: ${summary.leads}`,
+            `Profiles: ${summary.profiles}`,
+            `Owner: ${summary.ownerSnippet}`,
+        ];
+        return lines.join('\n');
     }
 
-    let knownSessionIds = [];
-    try {
-        const sessions = await store.listFiles(DATASTORE_TYPES.SESSIONS);
-        knownSessionIds = sessions.files;
-    } catch {
-        // No sessions folder yet.
+    const allSites = await listSites();
+    if (allSites.length === 0) {
+        return 'No sites found.';
     }
 
-    let knownProfileTemplates = [];
-    try {
-        const profiles = await store.listFiles(DATASTORE_TYPES.PROFILES);
-        knownProfileTemplates = profiles.files;
-    } catch {
-        // No profiles folder yet.
+    const summaries = await Promise.all(allSites.map((siteId) => getSiteSummary(siteId)));
+    const lines = [`Sites (${summaries.length}):`];
+    for (const s of summaries) {
+        lines.push(`- ${s.siteId}: sessions=${s.sessions}, leads=${s.leads}, profiles=${s.profiles}, owner=${s.ownerSnippet}`);
     }
-
-    let ownerInfoSnapshot = '(not configured)';
-    try {
-        const ownerFile = await store.getSectionMap(DATASTORE_TYPES.CONFIG, CONFIG_FILES.OWNER);
-        ownerInfoSnapshot = ownerFile.rawMarkdown || '(empty)';
-    } catch {
-        // Owner config not yet created.
-    }
-
-    let policySnapshot = '(not configured)';
-    try {
-        const policyFile = await store.getSectionMap(DATASTORE_TYPES.CONFIG, CONFIG_FILES.POLICY);
-        policySnapshot = policyFile.rawMarkdown || '(empty)';
-    } catch {
-        // Policy config not yet created.
-    }
-
-    let websiteInfoFiles = [];
-    try {
-        const infoFiles = await store.listFiles(DATASTORE_TYPES.INFO);
-        websiteInfoFiles = infoFiles.files;
-    } catch {
-        // No info folder yet.
-    }
-
-    const lines = [
-        `site_id: ${siteId}`,
-        `reference_date: ${referenceDate}`,
-        `known_lead_ids: ${knownLeadIds.length > 0 ? knownLeadIds.join(', ') : '(none)'}`,
-        `known_session_ids: ${knownSessionIds.length > 0 ? knownSessionIds.join(', ') : '(none)'}`,
-        `known_profile_templates: ${knownProfileTemplates.length > 0 ? knownProfileTemplates.join(', ') : '(none)'}`,
-        formatSnapshot('owner_info_snapshot', ownerInfoSnapshot),
-        formatSnapshot('policy_snapshot', policySnapshot),
-        `website_info_files: ${websiteInfoFiles.length > 0 ? websiteInfoFiles.join(', ') : '(none)'}`,
-    ];
-
     return lines.join('\n');
 }

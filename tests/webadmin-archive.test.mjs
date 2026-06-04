@@ -14,11 +14,11 @@ test('webadmin-archive moves session and lead files to archive', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             sessionIds: ['visitor-42'],
             target: 'sessions',
         }),
@@ -39,11 +39,11 @@ test('webadmin-archive skips missing files', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             sessionIds: ['nonexistent-session'],
             target: 'sessions',
         }),
@@ -59,24 +59,38 @@ test('webadmin-archive detects already-archived files', async (t) => {
     configureDataStore({
         agentRoot: sandbox.agentRoot,
         dataDir: sandbox.dataDir,
-        siteId: sandbox.siteId,
     });
 
-    // First archive.
     await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             sessionIds: ['visitor-42'],
             target: 'sessions',
         }),
     });
 
-    // Second archive attempt.
     const result = await action({
         promptText: JSON.stringify({
+            siteId: sandbox.siteId,
             sessionIds: ['visitor-42'],
             target: 'sessions',
         }),
     });
 
     assert.match(result, /Already archived.*session:visitor-42/);
+});
+
+test('webadmin-archive requires siteId', async (t) => {
+    const sandbox = await createWebAdminSandbox();
+    t.after(async () => sandbox.cleanup());
+
+    configureDataStore({
+        agentRoot: sandbox.agentRoot,
+        dataDir: sandbox.dataDir,
+    });
+
+    await assert.rejects(
+        () => action({ promptText: JSON.stringify({ target: 'sessions' }) }),
+        /requires siteId/
+    );
 });
