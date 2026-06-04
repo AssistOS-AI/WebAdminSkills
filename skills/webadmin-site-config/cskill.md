@@ -1,10 +1,11 @@
 # webadmin-site-config
 
 ## Description
-Creates or updates website configuration: owner contact routes, visitor notice, consent policy, and retention rules.
+Reads and updates site configuration files (owner contact rules and visitor policy) for a specific site. Use this skill when the admin wants to view or modify owner contact routes, visitor notice, retention rules, or contact routing policy. Call this skill when the admin asks about site configuration, policy settings, or owner contact rules, or wants to update retention periods, visitor notice text, or contact routing.
 
 ## Input Format
 - `promptText` contains a JSON object with:
+  - `siteId` (string, required) — which site to configure.
   - `target` (string, required; `owner` | `policy`)
   - `content` (string, optional; full replacement content)
   - `fields` (object, optional; field-level updates)
@@ -14,5 +15,5 @@ Creates or updates website configuration: owner contact routes, visitor notice, 
 - Read mode returns current configuration content.
 
 ## Constraints
-- Persists under `config/owner.md` and `config/policy.md`.
+- Persists under `data/sites/<siteId>/config/owner.md` and `data/sites/<siteId>/config/policy.md`.
 - Does not call the LLM.

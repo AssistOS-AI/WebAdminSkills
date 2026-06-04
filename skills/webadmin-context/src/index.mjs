@@ -1,35 +1,22 @@
 import {
-    getDataStore,
     getSiteStore,
     listSites,
 } from '../../../src/runtime/dataStore.mjs';
 import {
     DATASTORE_TYPES,
-    SESSION_SECTIONS,
-    LEAD_SECTIONS,
-    LEAD_FIELDS,
     CONFIG_FILES,
 } from '../../../src/constants/datastore.mjs';
 
-function parsePayload(promptText) {
-    try {
-        const parsed = JSON.parse(String(promptText ?? '{}'));
-        return parsed && typeof parsed === 'object' ? parsed : {};
-    } catch {
-        throw new Error('webadmin-context expects promptText to be valid JSON.');
-    }
-}
-
 async function getSiteSummary(siteId) {
     const store = getSiteStore(siteId);
-    let sessionCount = 0;
+    let sessionIds = [];
     let leadCount = 0;
     let profileCount = 0;
     let ownerSnippet = '(not configured)';
 
     try {
         const sessions = await store.listFiles(DATASTORE_TYPES.SESSIONS);
-        sessionCount = sessions.files.length;
+        sessionIds = sessions.files;
     } catch { /* no sessions folder */ }
 
     try {
@@ -50,38 +37,27 @@ async function getSiteSummary(siteId) {
 
     return {
         siteId,
-        sessions: sessionCount,
+        sessionIds,
         leads: leadCount,
         profiles: profileCount,
         ownerSnippet,
     };
 }
 
-export async function action({ promptText }) {
-    const payload = parsePayload(promptText);
-    const detailSiteId = typeof payload.siteId === 'string' ? payload.siteId.trim() : '';
-
-    if (detailSiteId) {
-        const summary = await getSiteSummary(detailSiteId);
-        const lines = [
-            `Site: ${summary.siteId}`,
-            `Sessions: ${summary.sessions}`,
-            `Leads: ${summary.leads}`,
-            `Profiles: ${summary.profiles}`,
-            `Owner: ${summary.ownerSnippet}`,
-        ];
-        return lines.join('\n');
-    }
-
+export async function action() {
     const allSites = await listSites();
     if (allSites.length === 0) {
         return 'No sites found.';
     }
 
     const summaries = await Promise.all(allSites.map((siteId) => getSiteSummary(siteId)));
-    const lines = [`Sites (${summaries.length}):`];
+    const lines = [`SiteIDs (${summaries.length}):`];
     for (const s of summaries) {
-        lines.push(`- ${s.siteId}: sessions=${s.sessions}, leads=${s.leads}, profiles=${s.profiles}, owner=${s.ownerSnippet}`);
+        lines.push(`\n--- ${s.siteId} ---`);
+        lines.push(`Sessions: ${s.sessionIds.length > 0 ? s.sessionIds.join(', ') : '(none)'}`);
+        lines.push(`Leads: ${s.leads}`);
+        lines.push(`Profiles: ${s.profiles}`);
+        lines.push(`Owner: ${s.ownerSnippet}`);
     }
     return lines.join('\n');
 }

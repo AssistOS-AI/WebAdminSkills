@@ -1,7 +1,7 @@
 # webadmin-ku-consolidate
 
 ## Description
-Reviews operational records selected by the administrator and produces consolidated findings, decisions, patterns, or analyses for storage as KUs.
+Reviews operational records selected by the administrator and produces consolidated findings, decisions, patterns, or analyses for storage as Knowledge Units. Use this skill when the admin wants to extract insights from sessions, leads, or statistics and store them as reusable knowledge. Call this skill when the admin wants to analyze visitor sessions, leads, or statistics to find patterns, wants to consolidate operational evidence into curated knowledge units, or asks for insights, trends, or analyses from WebAssist data.
 
 ## Help
 Input: natural admin request to consolidate selected operational evidence into KUs.

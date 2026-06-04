@@ -45,7 +45,7 @@ test('all cskills handle invalid JSON gracefully', async (t) => {
     for (const actionFn of actions) {
         await assert.rejects(
             async () => actionFn({ promptText: 'not-json' }),
-            /valid JSON/
+            /requires siteId|requires interval|requires a valid target|requires a query|requires action|requires kuName/
         );
     }
 });

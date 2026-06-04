@@ -1,22 +1,19 @@
 # webadmin-context
 
 ## Description
-Loads metadata for the selected site-id: profile names, owner info, policy, lead IDs, session IDs, and visit statistics.
+Lists all available sites with their session IDs, lead counts, profile counts, and owner info snippet.
 
 ## Input Format
 - No input parameters.
 
 ## Output Format
-- Plain-text key-value markdown fields:
+- Plain-text summary per site:
   - `site_id`
-  - `reference_date`
-  - `known_lead_ids`
-  - `known_session_ids`
-  - `known_profile_templates`
-  - `owner_info_snapshot`
-  - `policy_snapshot`
-  - `website_info_files`
+  - `sessions` (list of session IDs)
+  - `leads` (count)
+  - `profiles` (count)
+  - `owner` (first line of owner config)
 
 ## Constraints
-- Reads data from the configured site-scoped datastore only.
+- Reads data from the global datastore root.
 - Does not call the LLM.

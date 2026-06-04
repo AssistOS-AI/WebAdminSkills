@@ -7,11 +7,13 @@ import {
 } from '../../../src/constants/datastore.mjs';
 
 function parsePayload(promptText) {
+    const raw = String(promptText ?? '').trim();
+    if (!raw) return {};
     try {
-        const parsed = JSON.parse(String(promptText ?? '{}'));
+        const parsed = JSON.parse(raw);
         return parsed && typeof parsed === 'object' ? parsed : {};
     } catch {
-        throw new Error('webadmin-site-config expects promptText to be valid JSON.');
+        return {};
     }
 }
 
