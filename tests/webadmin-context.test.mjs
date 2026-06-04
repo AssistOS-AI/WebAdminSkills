@@ -16,9 +16,10 @@ test('webadmin-context lists all sites with session IDs', async (t) => {
 
     const result = await action();
 
-    assert.match(result, /Sites \(1\):/);
+    assert.match(result, /SiteIDs \(1\):/);
     assert.match(result, /demo-site/);
-    assert.match(result, /Sessions:.*visitor-42-history/);
+    assert.match(result, /Sessions:.*visitor-42/);
+    assert.doesNotMatch(result, /-history/);
     assert.match(result, /Leads:/);
     assert.match(result, /Profiles:/);
     assert.match(result, /Owner:/);

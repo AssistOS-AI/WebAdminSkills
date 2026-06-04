@@ -5,7 +5,19 @@ import {
 import {
     DATASTORE_TYPES,
     CONFIG_FILES,
+    SESSION_FILE_SUFFIX,
 } from '../../../src/constants/datastore.mjs';
+
+function extractSessionId(fileName) {
+    const base = fileName.replace(/\.md$/, '');
+    for (const suffix of Object.values(SESSION_FILE_SUFFIX)) {
+        const suffixPattern = `-${suffix}`;
+        if (base.endsWith(suffixPattern)) {
+            return base.slice(0, base.length - suffixPattern.length);
+        }
+    }
+    return base;
+}
 
 async function getSiteSummary(siteId) {
     const store = getSiteStore(siteId);
@@ -16,7 +28,11 @@ async function getSiteSummary(siteId) {
 
     try {
         const sessions = await store.listFiles(DATASTORE_TYPES.SESSIONS);
-        sessionIds = sessions.files;
+        const uniqueIds = new Set();
+        for (const fileName of sessions.files) {
+            uniqueIds.add(extractSessionId(fileName));
+        }
+        sessionIds = Array.from(uniqueIds);
     } catch { /* no sessions folder */ }
 
     try {
